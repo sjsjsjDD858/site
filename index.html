@@ -8,7 +8,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap');
   body {
     font-family: 'Montserrat', Arial, sans-serif;
-    background: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background: url(https://st3.depositphotos.com/10599158/36989/v/450/depositphotos_369899330-stock-illustration-neon-quiz-sign-vector-design.jpg) no-repeat center center fixed;
     background-size: cover;
     margin: 0; padding: 0;
     color: #fff;
@@ -145,14 +145,8 @@
     z-index: 100;
   }
   @keyframes fadeUp {
-    0% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-30px);
-    }
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-30px); }
   }
   #pointShopBtn {
     position: fixed;
@@ -171,13 +165,11 @@
     position: fixed;
     top: 120px;
     right: 30px;
-    width: 320px;
-    max-height: 460px;
+    width: 250px;
     background: rgba(0,0,0,0.9);
     border-radius: 12px;
     padding: 15px 20px;
     box-shadow: 0 0 20px rgba(255,204,0,0.9);
-    overflow-y: auto;
     display: none;
     z-index: 19;
     color: #fff;
@@ -197,18 +189,9 @@
     border: 1px solid #ffcc00;
     border-radius: 8px;
     background-color: #222;
-    box-shadow: inset 0 0 5px #ffcc00;
   }
-  .item img {
-    width: 32px;
-    height: 32px;
-    margin-right: 10px;
-  }
-  .item span {
-    flex: 1;
-    text-align: left;
-    padding-left: 10px;
-  }
+  .item img { width: 32px; height: 32px; margin-right: 10px; }
+  .item span { flex: 1; text-align: left; padding-left: 10px; }
   .item button {
     background-color: #ffcc00;
     padding: 6px 14px;
@@ -218,14 +201,9 @@
     color: #222;
     font-weight: 700;
   }
-  .item button:hover:not(:disabled) {
-    background-color: #e6b800;
-  }
-  .item button:disabled {
-    background-color: #555;
-    cursor: not-allowed;
-    color: #aaa;
-  }
+  .item button:hover:not(:disabled) { background-color: #e6b800; }
+  .item button:disabled { background-color: #555; cursor: not-allowed; color: #aaa; }
+
   #resultText {
     font-weight: 700;
     font-size: 22px;
@@ -251,9 +229,9 @@
   <div class="start-screen show">
     <h1>Yarışmaya Hoş Geldin!</h1>
     <p class="description">
-      Bu quizde 60 soru seni bekliyor.<br>
+      Bu quizde sorular seni bekliyor.<br>
       Her sorunun süresi 10 saniye.<br>
-      Doğru cevaplar 10 puan kazandırır.<br>
+      Her doğru cevap 1 puan kazandırır.<br>
       Puanlarını point shop'ta harcayabilirsin!<br>
       Yarışma başladıktan sonra mağaza kapanır.
     </p>
@@ -283,28 +261,12 @@
   <h3>Point Shop</h3>
   <div class="item">
     <img src="https://img.icons8.com/emoji/48/000000/bus-emoji.png" alt="Otobüs" />
-    <span>Otobüs Bileti (200 puan)</span>
-    <button id="buyBusTicket" onclick="buyItem('busTicket', 200)">Satın Al</button>
-  </div>
-  <div class="item">
-    <img src="https://img.icons8.com/ios-filled/50/ffcc00/coffee.png" alt="Kahve" />
-    <span>Kahve (100 puan)</span>
-    <button id="buyCoffee" onclick="buyItem('coffee', 100)">Satın Al</button>
-  </div>
-  <div class="item">
-    <img src="https://img.icons8.com/emoji/48/000000/chocolate-bar-emoji.png" alt="Çikolata" />
-    <span>Çikolata (50 puan)</span>
-    <button id="buyChocolate" onclick="buyItem('chocolate', 50)">Satın Al</button>
+    <span>Otobüs Bileti (60 puan)</span>
+    <button onclick="buyItem('busTicket', 60)">Satın Al</button>
   </div>
 </div>
 
-<div id="scoreAnim">+10</div>
-
-<!-- Sesler -->
-<audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2023/03/24/audio_94d8a00e88.mp3?filename=calm-relaxing-ambient-11247.mp3" loop preload="auto"></audio>
-<audio id="soundCorrect" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
-<audio id="soundWrong" src="https://actions.google.com/sounds/v1/cartoon/boing.ogg" preload="auto"></audio>
-<audio id="soundClick" src="https://actions.google.com/sounds/v1/ui/click.ogg" preload="auto"></audio>
+<div id="scoreAnim">+1</div>
 
 <script>
   const startBtn = document.getElementById('startBtn');
@@ -322,252 +284,190 @@
   const pointShopPanel = document.getElementById('pointShopPanel');
   const scoreAnim = document.getElementById('scoreAnim');
 
-  const bgMusic = document.getElementById('bgMusic');
-  const soundCorrect = document.getElementById('soundCorrect');
-  const soundWrong = document.getElementById('soundWrong');
-  const soundClick = document.getElementById('soundClick');
-
   let username = '';
   let currentQuestionIndex = 0;
-  let score = 0;
+  let score = parseInt(localStorage.getItem('userScore')) || 0;
   let timer;
   let timeLeft = 10;
   let quizStarted = false;
 
-  // 60 soruluk soru listesi
+  // Kullanıcı eşyaları
+  let userItems = JSON.parse(localStorage.getItem('userItems')) || { busTicket: 0 };
+
  const questions = [
-{question:"Dünyanın en büyük kıtası hangisidir?", options:["Asya","Afrika","Avrupa","Amerika"], answer:"Asya"}, //1
-{question:"İnsan vücudunda kaç kemik vardır?", options:["206","210","198","180"], answer:"206"}, //2
-{question:"Kızıl gezegen hangisidir?", options:["Mars","Venüs","Merkür","Jüpiter"], answer:"Mars"}, //3
-{question:"En uzun nehir hangisidir?", options:["Nil","Amazon","Fırat","Yangtze"], answer:"Nil"}, //4
-{question:"En sert madde nedir?", options:["Elmas","Altın","Demir","Bakır"], answer:"Elmas"}, //5
-{question:"Pizza hangi ülkenindir?", options:["İtalya","Fransa","Almanya","İspanya"], answer:"İtalya"}, //6
-{question:"Dünyanın uydusu nedir?", options:["Ay","Mars","Venüs","Güneş"], answer:"Ay"}, //7
-{question:"Türkiye kaç bölgedir?", options:["7","6","8","9"], answer:"7"}, //8
-{question:"En büyük gezegen hangisidir?", options:["Jüpiter","Mars","Venüs","Dünya"], answer:"Jüpiter"}, //9
-{question:"Kalpte kaç odacık vardır?", options:["4","3","2","5"], answer:"4"}, //10
+  { question: "Dünyanın en büyük kıtası hangisidir?", options: ["Asya", "Afrika", "Avrupa", "Amerika"], answer: "Asya" },
+  { question: "İnsan vücudunda kaç kemik vardır?", options: ["210", "198", "206", "180"], answer: "206" },
+  { question: "Hangi gezegen 'Kızıl Gezegen' olarak bilinir?", options: ["Venüs", "Mars", "Jüpiter", "Merkür"], answer: "Mars" },
+  { question: "Dünyanın en uzun nehri hangisidir?", options: ["Amazon", "Nil", "Mississippi", "Yangtze"], answer: "Nil" },
+  { question: "En sert doğal madde nedir?", options: ["Elmas", "Demir", "Altın", "Gümüş"], answer: "Elmas" },
+  { question: "Hangi ülke pizza ile ünlüdür?", options: ["Fransa", "İtalya", "İspanya", "Almanya"], answer: "İtalya" },
+  { question: "Elektriğin birimi nedir?", options: ["Volt", "Amper", "Watt", "Ohm"], answer: "Amper" },
+  { question: "Dünyanın uydusu hangisidir?", options: ["Ay", "Mars", "Güneş", "Venüs"], answer: "Ay" },
+  { question: "Türkiye kaç bölgeden oluşur?", options: ["6", "7", "8", "9"], answer: "7" },
+  { question: "En büyük gezegen hangisidir?", options: ["Mars", "Venüs", "Dünya", "Jüpiter"], answer: "Jüpiter" },
 
-{question:"Uçabilen memeli hangisidir?", options:["Yarasa","Kedi","Köpek","At"], answer:"Yarasa"}, //11
-{question:"Türkiye'nin para birimi?", options:["TL","Euro","Dolar","Sterlin"], answer:"TL"}, //12
-{question:"Güneş nedir?", options:["Yıldız","Gezegen","Uydu","Meteor"], answer:"Yıldız"}, //13
-{question:"En hızlı kara hayvanı?", options:["Çita","Aslan","At","Kurt"], answer:"Çita"}, //14
-{question:"Solunum gazı hangisi?", options:["Oksijen","Azot","Helyum","CO2"], answer:"Oksijen"}, //15
-{question:"Bir yılda kaç ay var?", options:["12","10","11","13"], answer:"12"}, //16
-{question:"En büyük okyanus?", options:["Pasifik","Atlantik","Hint","Arktik"], answer:"Pasifik"}, //17
-{question:"Sarı meyve hangisi?", options:["Muz","Elma","Kiraz","Üzüm"], answer:"Muz"}, //18
-{question:"Atatürk doğum yılı?", options:["1881","1880","1882","1883"], answer:"1881"}, //19
-{question:"Türkiye'nin başkenti?", options:["Ankara","İstanbul","İzmir","Bursa"], answer:"Ankara"}, //20
+  { question: "İnsan kalbi kaç odacıktan oluşur?", options: ["4", "3", "2", "5"], answer: "4" },
+  { question: "Hangi hayvan uçar?", options: ["Kedi", "Yarasa", "At", "Tavşan"], answer: "Yarasa" },
+  { question: "Türkiye'nin para birimi nedir?", options: ["TL", "Euro", "Dolar", "Sterlin"], answer: "TL" },
+  { question: "Güneş bir...", options: ["Yıldız", "Gezegen", "Uydu", "Meteor"], answer: "Yıldız" },
+  { question: "En hızlı kara hayvanı hangisidir?", options: ["Aslan", "At", "Çita", "Köpek"], answer: "Çita" },
+  { question: "Hangi gaz solunum için gereklidir?", options: ["Azot", "Karbondioksit", "Oksijen", "Helyum"], answer: "Oksijen" },
+  { question: "Bir yılda kaç ay vardır?", options: ["11", "12", "10", "13"], answer: "12" },
+  { question: "En büyük okyanus hangisidir?", options: ["Atlantik", "Pasifik", "Hint", "Arktik"], answer: "Pasifik" },
+  { question: "Hangi meyve sarıdır?", options: ["Kiraz", "Muz", "Elma", "Üzüm"], answer: "Muz" },
+  { question: "Atatürk hangi yıl doğmuştur?", options: ["1881", "1880", "1882", "1883"], answer: "1881" },
 
-{question:"En yüksek dağ?", options:["Everest","K2","Alpler","Andlar"], answer:"Everest"}, //21
-{question:"Su kaç derecede donar?", options:["0","10","50","100"], answer:"0"}, //22
-{question:"Güneşe en yakın gezegen?", options:["Merkür","Venüs","Mars","Jüpiter"], answer:"Merkür"}, //23
-{question:"Cumhuriyet yılı?", options:["1923","1920","1918","1930"], answer:"1923"}, //24
-{question:"Türkiye'nin en uzun nehri?", options:["Kızılırmak","Fırat","Dicle","Sakarya"], answer:"Kızılırmak"}, //25
-{question:"Ay kaç günde döner?", options:["28","7","14","365"], answer:"28"}, //26
-{question:"Eyfel nerede?", options:["Paris","Roma","Londra","Berlin"], answer:"Paris"}, //27
-{question:"Bir haftada kaç gün?", options:["7","6","8","5"], answer:"7"}, //28
-{question:"En büyük organ?", options:["Deri","Kalp","Akciğer","Mide"], answer:"Deri"}, //29
-{question:"En kalabalık ülke?", options:["Çin","ABD","Rusya","Brezilya"], answer:"Çin"}, //30
+  { question: "Türkiye'nin başkenti neresidir?", options: ["İstanbul", "Ankara", "İzmir", "Bursa"], answer: "Ankara" },
+  { question: "Dünyanın en yüksek dağı hangisidir?", options: ["K2", "Everest", "Alpler", "Andlar"], answer: "Everest" },
+  { question: "Su kaç derecede donar?", options: ["0°C", "10°C", "50°C", "100°C"], answer: "0°C" },
+  { question: "Güneş'e en yakın gezegen hangisidir?", options: ["Venüs", "Merkür", "Mars", "Jüpiter"], answer: "Merkür" },
+  { question: "RGB sisteminde olmayan renk hangisidir?", options: ["Sarı", "Kırmızı", "Mavi", "Yeşil"], answer: "Sarı" },
+  { question: "Türkiye'nin en uzun nehri hangisidir?", options: ["Fırat", "Kızılırmak", "Dicle", "Sakarya"], answer: "Kızılırmak" },
+  { question: "Cumhuriyet hangi yıl ilan edilmiştir?", options: ["1920", "1923", "1918", "1930"], answer: "1923" },
+  { question: "Ay Dünya etrafında kaç günde döner?", options: ["7", "28", "14", "365"], answer: "28" },
+  { question: "Işık hızından hızlı bir şey var mı?", options: ["Hayır", "Evet", "Bazen", "Bilimsel değil"], answer: "Hayır" },
+  { question: "Hangi element suyun kimyasal formülünde yoktur?", options: ["Hidrojen", "Oksijen", "Azot", "He"], answer: "Azot" },
 
-{question:"Türkiye'nin en büyük şehri?", options:["İstanbul","Ankara","İzmir","Bursa"], answer:"İstanbul"}, //31
-{question:"Halkalı gezegen?", options:["Satürn","Mars","Venüs","Merkür"], answer:"Satürn"}, //32
-{question:"En büyük memeli?", options:["Mavi balina","Fil","Zürafa","Aslan"], answer:"Mavi balina"}, //33
-{question:"1 saat kaç dakika?", options:["60","90","30","100"], answer:"60"}, //34
-{question:"Dünya şekli?", options:["Küre","Kare","Üçgen","Dikdörtgen"], answer:"Küre"}, //35
-{question:"Ayakla oynanan spor?", options:["Futbol","Basketbol","Tenis","Voleybol"], answer:"Futbol"}, //36
-{question:"Kar hangi mevsimde?", options:["Kış","Yaz","Sonbahar","İlkbahar"], answer:"Kış"}, //37
-{question:"Kanı temizleyen organ?", options:["Böbrek","Kalp","Akciğer","Mide"], answer:"Böbrek"}, //38
-{question:"En büyük deniz?", options:["Akdeniz","Karadeniz","Ege","Marmara"], answer:"Akdeniz"}, //39
-{question:"Işığın kaynağı?", options:["Güneş","Ay","Dünya","Yıldız"], answer:"Güneş"}, //40
+  { question: "Hangi ülke 'Eiffel Kulesi'ne ev sahipliği yapar?", options: ["Fransa", "İtalya", "İspanya", "Almanya"], answer: "Fransa" },
+  { question: "Hangi organ kanı temizler?", options: ["Böbrek", "Kalp", "Akciğer", "Karaciğer"], answer: "Böbrek" },
+  { question: "Ay'ın Dünya etrafındaki dönüş süresi nedir?", options: ["24 saat", "7 gün", "28 gün", "365 gün"], answer: "28 gün" },
+  { question: "Hangi şehir 'Şeyh Zayed Camii'ne ev sahipliği yapar?", options: ["Abu Dhabi", "Dubai", "Kahire", "İstanbul"], answer: "Abu Dhabi" },
+  { question: "Hangisi bir programlama dili değildir?", options: ["HTML", "Python", "JavaScript", "CSS"], answer: "HTML" },
+  { question: "Bir haftada kaç gün vardır?", options: ["5", "6", "8", "7"], answer: "7" },
+  { question: "Hangi gezegen en büyüktür?", options: ["Mars", "Dünya", "Venüs", "Jüpiter"], answer: "Jüpiter" },
+  { question: "Hangi dil dünya genelinde en çok konuşulan anadil olarak kabul edilir?", options: ["İngilizce", "Çince (Mandarin)", "İspanyolca", "Hintçe"], answer: "Çince (Mandarin)" },
+  { question: "Hangi hayvan uçabilir?", options: ["At", "Yarasa", "Kedi", "Tavşan"], answer: "Yarasa" },
+  { question: "Elektrik birimi nedir?", options: ["Watt", "Volt", "Amper", "Ohm"], answer: "Amper" },
 
-{question:"Hangi hayvan uzun boyunlu?", options:["Zürafa","Fil","At","Deve"], answer:"Zürafa"}, //41
-{question:"Elektriğin birimi?", options:["Amper","Metre","Kilo","Saniye"], answer:"Amper"}, //42
-{question:"Türkiye'nin komşusu olmayan?", options:["Almanya","Yunanistan","İran","Bulgaristan"], answer:"Almanya"}, //43
-{question:"En sıcak gezegen?", options:["Venüs","Merkür","Mars","Jüpiter"], answer:"Venüs"}, //44
-{question:"Bitkiler ne üretir?", options:["Oksijen","Karbondioksit","Azot","Helyum"], answer:"Oksijen"}, //45
-{question:"Hangi araç uçar?", options:["Uçak","Tren","Otobüs","Araba"], answer:"Uçak"}, //46
-{question:"En hızlı kuş?", options:["Doğan","Kartal","Güvercin","Martı"], answer:"Doğan"}, //47
-{question:"Su kaç derecede kaynar?", options:["100","90","80","50"], answer:"100"}, //48
-{question:"Günde kaç saat var?", options:["24","12","48","20"], answer:"24"}, //49
-{question:"En küçük gezegen?", options:["Merkür","Mars","Venüs","Neptün"], answer:"Merkür"}, //50
+  { question: "Hangi yıl Türkiye Cumhuriyeti ilan edilmiştir?", options: ["1918", "1923", "1920", "1930"], answer: "1923" },
+  { question: "Hangi gezegen Güneş'e en yakındır?", options: ["Merkür", "Venüs", "Mars", "Jüpiter"], answer: "Merkür" },
+  { question: "En hızlı hayvan hangisidir?", options: ["Kaplan", "At", "Çita", "Kurt"], answer: "Çita" },
+  { question: "Hangi renk RGB renk modelinde yoktur?", options: ["Sarı", "Kırmızı", "Yeşil", "Mavi"], answer: "Sarı" },
+  { question: "Türkiye kaç bölgedir?", options: ["6", "7", "8", "9"], answer: "7" },
+  { question: "En büyük okyanus hangisidir?", options: ["Hint", "Pasifik", "Atlantik", "Arktik"], answer: "Pasifik" },
+  { question: "Hangi gaz insanlar için gereklidir?", options: ["Oksijen", "Helyum", "Azot", "Karbondioksit"], answer: "Oksijen" },
+  { question: "Atatürk'ün doğum yılı nedir?", options: ["1881", "1880", "1882", "1883"], answer: "1881" },
+  { question: "Işık hızından daha hızlı ne olabilir?", options: ["Ses", "Hiçbir şey", "Elektron", "Radyo dalgaları"], answer: "Hiçbir şey" },
+  { question: "Hangi organ insan vücudunda detoks yapar?", options: ["Böbrek", "Karaciğer", "Akciğer", "Kalp"], answer: "Böbrek" },
 
-{question:"Hangi hayvan süt verir?", options:["İnek","Tavuk","Balık","Yılan"], answer:"İnek"}, //51
-{question:"Beynin görevi?", options:["Düşünmek","Sindirmek","Solumak","Pompalamak"], answer:"Düşünmek"}, //52
-{question:"Yağmur neyle oluşur?", options:["Bulut","Toprak","Rüzgar","Güneş"], answer:"Bulut"}, //53
-{question:"En sert kaya?", options:["Granit","Kum","Toprak","Çamur"], answer:"Granit"}, //54
-{question:"Hangi hayvan sürünür?", options:["Yılan","Kedi","Köpek","At"], answer:"Yılan"}, //55
-{question:"Hangi organ görür?", options:["Göz","Kulak","Burun","Dil"], answer:"Göz"}, //56
-{question:"Hangi taşıt denizde gider?", options:["Gemi","Otobüs","Uçak","Tren"], answer:"Gemi"}, //57
-{question:"En büyük kıta tekrar?", options:["Asya","Afrika","Avrupa","Avustralya"], answer:"Asya"}, //58
-{question:"Hangi meyve kırmızı?", options:["Elma","Muz","Armut","Kivi"], answer:"Elma"}, //59
-{question:"Hangi gezegen mavi görünür?", options:["Neptün","Mars","Venüs","Merkür"], answer:"Neptün"} //60
+  { question: "En hızlı uçabilen kuş hangisidir?", options: ["Serçe", "Kartal", "Albatros", "Sokak kuşu"], answer: "Kartal" },
+  { question: "Dünyada en çok konuşulan ikinci dil hangisidir?", options: ["İspanyolca", "İngilizce", "Fransızca", "Almanca"], answer: "İspanyolca" },
+  { question: "Dünya üzerinde en büyük çöl hangisidir?", options: ["Sahara", "Gobi", "Kalahari", "Atacama"], answer: "Sahara" },
+  { question: "En uzun insan boyu rekoru kime aittir?", options: ["Robert Wadlow", "Sultan Kösen", "Andre the Giant", "Leonid Stadnyk"], answer: "Robert Wadlow" },
+  { question: "Hangi metal iletkenliği en yüksek olanıdır?", options: ["Bakır", "Alüminyum", "Altın", "Demir"], answer: "Bakır" },
+  { question: "Hangi ülke çay ile ünlüdür?", options: ["Hindistan", "İngiltere", "Çin", "Japonya"], answer: "İngiltere" },
+  { question: "Hangi gezegen halkaları ile ünlüdür?", options: ["Satürn", "Jüpiter", "Mars", "Venüs"], answer: "Satürn" },
+  { question: "Hangi hayvanın boynuzu vardır?", options: ["Geyik", "Kedi", "Köpek", "At"], answer: "Geyik" },
+  { question: "Hangi elementin sembolü 'O' dur?", options: ["Oksijen", "Altın", "Hidrojen", "Gümüş"], answer: "Oksijen" },
+  { question: "Dünyanın en kirli şehri hangisidir?", options: ["Çin", "Pakistan", "Hindistan", "Suriye"], answer: "Hindistan" }
 ];
 
 
-
-  // Kullanıcı eşyaları
-  let userItems = JSON.parse(localStorage.getItem('userItems')) || {
-    busTicket: 0,
-    coffee: 0,
-    chocolate: 0
-  };
-
-  // Kullanıcı puanı
-  let storedScore = parseInt(localStorage.getItem('userScore')) || 0;
-  updateScore(storedScore);
-
-  function updateScore(newScore) {
+  function updateScore(newScore){
     score = newScore;
     scoreboard.textContent = `Puan: ${score}`;
     localStorage.setItem('userScore', score);
   }
 
-  // Animasyon için puan ekleme
-  function animateScore(points) {
+  function animateScore(points){
     scoreAnim.textContent = `+${points}`;
     scoreAnim.style.opacity = '1';
     scoreAnim.style.animation = 'none';
-    // Trigger reflow for restart animation
     void scoreAnim.offsetWidth;
     scoreAnim.style.animation = 'fadeUp 1s forwards';
   }
 
-  // Mağaza kontrolü - quiz başladı mı?
   let shopOpen = true;
 
   pointShopBtn.addEventListener('click', () => {
-    if (!shopOpen) {
-      alert('Yarışma başladı, mağaza kapandı!');
-      return;
-    }
-    if(pointShopPanel.style.display === 'block') {
-      pointShopPanel.style.display = 'none';
-    } else {
-      pointShopPanel.style.display = 'block';
-    }
-    soundClick.play();
+    if(!shopOpen){ alert('Yarışma başladı, mağaza kapandı!'); return; }
+    pointShopPanel.style.display = pointShopPanel.style.display==='block'?'none':'block';
   });
 
-  function buyItem(item, cost) {
-    if (!shopOpen) {
-      alert('Yarışma başladı, mağaza kapandı!');
-      return;
-    }
-    if(score >= cost) {
+  function buyItem(item,cost){
+    if(!shopOpen){ alert('Yarışma başladı, mağaza kapandı!'); return; }
+    if(score >= cost){
       userItems[item]++;
       updateScore(score - cost);
       localStorage.setItem('userItems', JSON.stringify(userItems));
-      alert(`${item === 'busTicket' ? 'Otobüs bileti' : item === 'coffee' ? 'Kahve' : 'Çikolata'} satın alındı!`);
-      soundClick.play();
-    } else {
-      alert('Yeterli puanın yok!');
-    }
+      alert('Otobüs bileti satın alındı! (5 TL değerinde)');
+    } else { alert('Yeterli puanın yok!'); }
   }
 
-  startBtn.addEventListener('click', () => {
+  startBtn.addEventListener('click', ()=>{
     username = usernameInput.value.trim();
-    if(username.length < 2) {
-      alert('Lütfen adını düzgün gir!');
-      return;
-    }
+    if(username.length<2){ alert('Lütfen adını düzgün gir!'); return; }
     startScreen.classList.remove('show');
     quizScreen.classList.add('show');
     welcomeText.textContent = `Hoşgeldin, ${username}!`;
-    shopOpen = false; // yarışma başlayınca mağaza kapanır
-    pointShopPanel.style.display = 'none';
-    bgMusic.volume = 0.15;
-    bgMusic.play();
+    shopOpen = false;
+    pointShopPanel.style.display='none';
     quizStarted = true;
-    currentQuestionIndex = 0;
-    updateScore(score); // stored puan varsa göster
+    currentQuestionIndex=0;
+    updateScore(score);
     loadQuestion();
   });
 
-  function loadQuestion() {
+  function loadQuestion(){
     clearMessage();
-    timeLeft = 10;
-    timerText.textContent = `Süre: ${timeLeft}`;
+    timeLeft=10;
+    timerText.textContent=`Süre: ${timeLeft}`;
     questionText.textContent = questions[currentQuestionIndex].question;
-    optionsContainer.innerHTML = '';
-    questions[currentQuestionIndex].options.forEach(option => {
-      const btn = document.createElement('button');
-      btn.textContent = option;
-      btn.onclick = () => answerQuestion(btn, option);
+    optionsContainer.innerHTML='';
+    questions[currentQuestionIndex].options.forEach(option=>{
+      const btn=document.createElement('button');
+      btn.textContent=option;
+      btn.onclick=()=>answerQuestion(btn,option);
       optionsContainer.appendChild(btn);
     });
-    timer = setInterval(() => {
+    timer=setInterval(()=>{
       timeLeft--;
-      timerText.textContent = `Süre: ${timeLeft}`;
-      if(timeLeft === 0) {
+      timerText.textContent=`Süre: ${timeLeft}`;
+      if(timeLeft===0){
         clearInterval(timer);
         disableOptions();
         showCorrectAnswer();
-        setTimeout(nextQuestion, 2000);
+        setTimeout(nextQuestion,2000);
       }
-    }, 1000);
+    },1000);
   }
 
-  function answerQuestion(btn, selected) {
-    if(timer === null) return; // cevap verildi zaten
+  function answerQuestion(btn,selected){
+    if(timer===null) return;
     clearInterval(timer);
     disableOptions();
-
     const correctAnswer = questions[currentQuestionIndex].answer;
-
-    if(selected === correctAnswer) {
+    if(selected===correctAnswer){
       btn.classList.add('correct');
-      showMessage('Doğru!', true);
-      soundCorrect.play();
-      updateScore(score + 10);
-      animateScore(10);
+      showMessage('Doğru!',true);
+      updateScore(score+1);
+      animateScore(1);
     } else {
       btn.classList.add('wrong');
-      showMessage(`Yanlış! Doğru cevap: ${correctAnswer}`, false);
-      soundWrong.play();
+      showMessage(`Yanlış! Doğru cevap: ${correctAnswer}`,false);
       showCorrectAnswer();
     }
-
-    setTimeout(nextQuestion, 2000);
+    setTimeout(nextQuestion,2000);
   }
 
-  function disableOptions() {
-    [...optionsContainer.children].forEach(btn => {
-      btn.disabled = true;
-    });
-    timer = null;
-  }
+  function disableOptions(){ [...optionsContainer.children].forEach(btn=>btn.disabled=true); timer=null; }
 
-  function showCorrectAnswer() {
-    [...optionsContainer.children].forEach(btn => {
-      if(btn.textContent === questions[currentQuestionIndex].answer) {
-        btn.classList.add('correct');
-      }
-    });
-  }
+  function showCorrectAnswer(){ [...optionsContainer.children].forEach(btn=>{ if(btn.textContent===questions[currentQuestionIndex].answer) btn.classList.add('correct'); }); }
 
-  function nextQuestion() {
+  function nextQuestion(){ 
     currentQuestionIndex++;
-    if(currentQuestionIndex >= questions.length) {
-      endQuiz();
-    } else {
-      loadQuestion();
-    }
+    if(currentQuestionIndex>=questions.length) endQuiz(); 
+    else loadQuestion(); 
   }
 
-  function endQuiz() {
+  function endQuiz(){
     quizScreen.classList.remove('show');
     resultScreen.classList.add('show');
-    document.getElementById('resultText').textContent = `${username}, toplam puanın: ${score}`;
-    bgMusic.pause();
+    document.getElementById('resultText').textContent=`${username}, toplam puanın: ${score}`;
   }
 
-  function showMessage(text, correct) {
-    messageBox.textContent = text;
-    messageBox.style.color = correct ? '#4caf50' : '#f44336';
-  }
-  function clearMessage() {
-    messageBox.textContent = '';
-  }
+  function showMessage(text,correct){ messageBox.textContent=text; messageBox.style.color=correct?'#4caf50':'#f44336'; }
+  function clearMessage(){ messageBox.textContent=''; }
 </script>
 
 </body>
