@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Yarışma Zamanı</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap');
+  body {
+    font-family: 'Montserrat', Arial, sans-serif;
+    background: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0; padding: 0;
+    color: #fff;
+    overflow-x: hidden;
+  }
+  .overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 0;
+  }
+  .container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: rgba(0,0,0,0.85);
+    padding: 30px 40px 50px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  h1, h2 {
+    color: #ffcc00;
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 4px #000;
+  }
+  p.description {
+    font-size: 16px;
+    color: #ddd;
+    margin-bottom: 25px;
+  }
+  input#username {
+    padding: 10px;
+    font-size: 16px;
+    width: 60%;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    text-align: center;
+  }
+  button {
+    padding: 12px 25px;
+    font-size: 16px;
+    background-color: #ffcc00;
+    border: none;
+    border-radius: 6px;
+    color: #222;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 15px;
+    font-weight: 700;
+    box-shadow: 0 4px 6px rgba(255,204,0,0.7);
+  }
+  button:hover:not(:disabled) {
+    background-color: #e6b800;
+  }
+  button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+    color: #aaa;
+  }
+  .question {
+    font-size: 22px;
+    margin-bottom: 20px;
+    min-height: 60px;
+    font-weight: 700;
+    color: #ffeb3b;
+    text-shadow: 1px 1px 3px #000;
+  }
+  .options button {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+    font-size: 18px;
+    background-color: #444;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+    transition: background-color 0.3s ease;
+  }
+  .options button:hover:not(.disabled) {
+    background-color: #666;
+  }
+  .options button.correct {
+    background-color: #4caf50 !important;
+    color: white;
+    box-shadow: 0 0 10px #4caf50;
+  }
+  .options button.wrong {
+    background-color: #f44336 !important;
+    color: white;
+    box-shadow: 0 0 10px #f44336;
+  }
+  .start-screen, .quiz-screen, .result-screen {
+    display: none;
+  }
+  .show {
+    display: block;
+  }
+  #timer {
+    font-size: 20px;
+    color: #fff;
+    margin-bottom: 15px;
+    font-weight: 700;
+    text-shadow: 1px 1px 3px #000;
+  }
+  #scoreboard {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffcc00;
+    text-shadow: 1px 1px 3px #000;
+    z-index: 100;
+    user-select: none;
+  }
+  #scoreAnim {
+    position: fixed;
+    right: 30px;
+    top: 60px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffcc00;
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    animation: fadeUp 1s forwards;
+    text-shadow: 1px 1px 3px #000;
+    z-index: 100;
+  }
+  @keyframes fadeUp {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+  }
+  #pointShopBtn {
+    position: fixed;
+    top: 80px;
+    right: 30px;
+    background-color: #ffcc00;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(255,204,0,0.7);
+    z-index: 20;
+  }
+  #pointShopPanel {
+    position: fixed;
+    top: 120px;
+    right: 30px;
+    width: 320px;
+    max-height: 460px;
+    background: rgba(0,0,0,0.9);
+    border-radius: 12px;
+    padding: 15px 20px;
+    box-shadow: 0 0 20px rgba(255,204,0,0.9);
+    overflow-y: auto;
+    display: none;
+    z-index: 19;
+    color: #fff;
+  }
+  #pointShopPanel h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #ffcc00;
+    text-align: center;
+  }
+  .item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px 12px;
+    border: 1px solid #ffcc00;
+    border-radius: 8px;
+    background-color: #222;
+    box-shadow: inset 0 0 5px #ffcc00;
+  }
+  .item img {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+  }
+  .item span {
+    flex: 1;
+    text-align: left;
+    padding-left: 10px;
+  }
+  .item button {
+    background-color: #ffcc00;
+    padding: 6px 14px;
+    font-size: 14px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    color: #222;
+    font-weight: 700;
+  }
+  .item button:hover:not(:disabled) {
+    background-color: #e6b800;
+  }
+  .item button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    color: #aaa;
+  }
+  #resultText {
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #ffeb3b;
+    text-shadow: 1px 1px 3px #000;
+  }
+  #messageBox {
+    margin-top: 15px;
+    font-weight: 700;
+    color: #ffcc00;
+    text-shadow: 1px 1px 3px #000;
+    min-height: 24px;
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay"></div>
+
+<div class="container">
+
+  <div class="start-screen show">
+    <h1>Yarışmaya Hoş Geldin!</h1>
+    <p class="description">
+      Bu quizde 60 soru seni bekliyor.<br>
+      Her sorunun süresi 10 saniye.<br>
+      Doğru cevaplar 10 puan kazandırır.<br>
+      Puanlarını point shop'ta harcayabilirsin!<br>
+      Yarışma başladıktan sonra mağaza kapanır.
+    </p>
+    <input type="text" id="username" placeholder="Adını yaz..." />
+    <br />
+    <button id="startBtn">Başla</button>
+  </div>
+
+  <div class="quiz-screen">
+    <h2 id="welcome"></h2>
+    <div id="timer">Süre: 10</div>
+    <div id="scoreboard">Puan: 0</div>
+    <div class="question" id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div id="messageBox"></div>
+  </div>
+
+  <div class="result-screen">
+    <h2>Yarışma Bitti!</h2>
+    <p id="resultText"></p>
+    <button onclick="location.reload()">Yeniden Başla</button>
+  </div>
+</div>
+
+<button id="pointShopBtn">Point Shop</button>
+<div id="pointShopPanel">
+  <h3>Point Shop</h3>
+  <div class="item">
+    <img src="https://img.icons8.com/emoji/48/000000/bus-emoji.png" alt="Otobüs" />
+    <span>Otobüs Bileti (200 puan)</span>
+    <button id="buyBusTicket" onclick="buyItem('busTicket', 200)">Satın Al</button>
+  </div>
+  <div class="item">
+    <img src="https://img.icons8.com/ios-filled/50/ffcc00/coffee.png" alt="Kahve" />
+    <span>Kahve (100 puan)</span>
+    <button id="buyCoffee" onclick="buyItem('coffee', 100)">Satın Al</button>
+  </div>
+  <div class="item">
+    <img src="https://img.icons8.com/emoji/48/000000/chocolate-bar-emoji.png" alt="Çikolata" />
+    <span>Çikolata (50 puan)</span>
+    <button id="buyChocolate" onclick="buyItem('chocolate', 50)">Satın Al</button>
+  </div>
+</div>
+
+<div id="scoreAnim">+10</div>
+
+<!-- Sesler -->
+<audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2023/03/24/audio_94d8a00e88.mp3?filename=calm-relaxing-ambient-11247.mp3" loop preload="auto"></audio>
+<audio id="soundCorrect" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+<audio id="soundWrong" src="https://actions.google.com/sounds/v1/cartoon/boing.ogg" preload="auto"></audio>
+<audio id="soundClick" src="https://actions.google.com/sounds/v1/ui/click.ogg" preload="auto"></audio>
+
+<script>
+  const startBtn = document.getElementById('startBtn');
+  const usernameInput = document.getElementById('username');
+  const startScreen = document.querySelector('.start-screen');
+  const quizScreen = document.querySelector('.quiz-screen');
+  const resultScreen = document.querySelector('.result-screen');
+  const welcomeText = document.getElementById('welcome');
+  const questionText = document.getElementById('questionText');
+  const optionsContainer = document.getElementById('optionsContainer');
+  const timerText = document.getElementById('timer');
+  const scoreboard = document.getElementById('scoreboard');
+  const messageBox = document.getElementById('messageBox');
+  const pointShopBtn = document.getElementById('pointShopBtn');
+  const pointShopPanel = document.getElementById('pointShopPanel');
+  const scoreAnim = document.getElementById('scoreAnim');
+
+  const bgMusic = document.getElementById('bgMusic');
+  const soundCorrect = document.getElementById('soundCorrect');
+  const soundWrong = document.getElementById('soundWrong');
+  const soundClick = document.getElementById('soundClick');
+
+  let username = '';
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let timer;
+  let timeLeft = 10;
+  let quizStarted = false;
+
+  // 60 soruluk soru listesi
+ const questions = [
+{question:"Dünyanın en büyük kıtası hangisidir?", options:["Asya","Afrika","Avrupa","Amerika"], answer:"Asya"}, //1
+{question:"İnsan vücudunda kaç kemik vardır?", options:["206","210","198","180"], answer:"206"}, //2
+{question:"Kızıl gezegen hangisidir?", options:["Mars","Venüs","Merkür","Jüpiter"], answer:"Mars"}, //3
+{question:"En uzun nehir hangisidir?", options:["Nil","Amazon","Fırat","Yangtze"], answer:"Nil"}, //4
+{question:"En sert madde nedir?", options:["Elmas","Altın","Demir","Bakır"], answer:"Elmas"}, //5
+{question:"Pizza hangi ülkenindir?", options:["İtalya","Fransa","Almanya","İspanya"], answer:"İtalya"}, //6
+{question:"Dünyanın uydusu nedir?", options:["Ay","Mars","Venüs","Güneş"], answer:"Ay"}, //7
+{question:"Türkiye kaç bölgedir?", options:["7","6","8","9"], answer:"7"}, //8
+{question:"En büyük gezegen hangisidir?", options:["Jüpiter","Mars","Venüs","Dünya"], answer:"Jüpiter"}, //9
+{question:"Kalpte kaç odacık vardır?", options:["4","3","2","5"], answer:"4"}, //10
+
+{question:"Uçabilen memeli hangisidir?", options:["Yarasa","Kedi","Köpek","At"], answer:"Yarasa"}, //11
+{question:"Türkiye'nin para birimi?", options:["TL","Euro","Dolar","Sterlin"], answer:"TL"}, //12
+{question:"Güneş nedir?", options:["Yıldız","Gezegen","Uydu","Meteor"], answer:"Yıldız"}, //13
+{question:"En hızlı kara hayvanı?", options:["Çita","Aslan","At","Kurt"], answer:"Çita"}, //14
+{question:"Solunum gazı hangisi?", options:["Oksijen","Azot","Helyum","CO2"], answer:"Oksijen"}, //15
+{question:"Bir yılda kaç ay var?", options:["12","10","11","13"], answer:"12"}, //16
+{question:"En büyük okyanus?", options:["Pasifik","Atlantik","Hint","Arktik"], answer:"Pasifik"}, //17
+{question:"Sarı meyve hangisi?", options:["Muz","Elma","Kiraz","Üzüm"], answer:"Muz"}, //18
+{question:"Atatürk doğum yılı?", options:["1881","1880","1882","1883"], answer:"1881"}, //19
+{question:"Türkiye'nin başkenti?", options:["Ankara","İstanbul","İzmir","Bursa"], answer:"Ankara"}, //20
+
+{question:"En yüksek dağ?", options:["Everest","K2","Alpler","Andlar"], answer:"Everest"}, //21
+{question:"Su kaç derecede donar?", options:["0","10","50","100"], answer:"0"}, //22
+{question:"Güneşe en yakın gezegen?", options:["Merkür","Venüs","Mars","Jüpiter"], answer:"Merkür"}, //23
+{question:"Cumhuriyet yılı?", options:["1923","1920","1918","1930"], answer:"1923"}, //24
+{question:"Türkiye'nin en uzun nehri?", options:["Kızılırmak","Fırat","Dicle","Sakarya"], answer:"Kızılırmak"}, //25
+{question:"Ay kaç günde döner?", options:["28","7","14","365"], answer:"28"}, //26
+{question:"Eyfel nerede?", options:["Paris","Roma","Londra","Berlin"], answer:"Paris"}, //27
+{question:"Bir haftada kaç gün?", options:["7","6","8","5"], answer:"7"}, //28
+{question:"En büyük organ?", options:["Deri","Kalp","Akciğer","Mide"], answer:"Deri"}, //29
+{question:"En kalabalık ülke?", options:["Çin","ABD","Rusya","Brezilya"], answer:"Çin"}, //30
+
+{question:"Türkiye'nin en büyük şehri?", options:["İstanbul","Ankara","İzmir","Bursa"], answer:"İstanbul"}, //31
+{question:"Halkalı gezegen?", options:["Satürn","Mars","Venüs","Merkür"], answer:"Satürn"}, //32
+{question:"En büyük memeli?", options:["Mavi balina","Fil","Zürafa","Aslan"], answer:"Mavi balina"}, //33
+{question:"1 saat kaç dakika?", options:["60","90","30","100"], answer:"60"}, //34
+{question:"Dünya şekli?", options:["Küre","Kare","Üçgen","Dikdörtgen"], answer:"Küre"}, //35
+{question:"Ayakla oynanan spor?", options:["Futbol","Basketbol","Tenis","Voleybol"], answer:"Futbol"}, //36
+{question:"Kar hangi mevsimde?", options:["Kış","Yaz","Sonbahar","İlkbahar"], answer:"Kış"}, //37
+{question:"Kanı temizleyen organ?", options:["Böbrek","Kalp","Akciğer","Mide"], answer:"Böbrek"}, //38
+{question:"En büyük deniz?", options:["Akdeniz","Karadeniz","Ege","Marmara"], answer:"Akdeniz"}, //39
+{question:"Işığın kaynağı?", options:["Güneş","Ay","Dünya","Yıldız"], answer:"Güneş"}, //40
+
+{question:"Hangi hayvan uzun boyunlu?", options:["Zürafa","Fil","At","Deve"], answer:"Zürafa"}, //41
+{question:"Elektriğin birimi?", options:["Amper","Metre","Kilo","Saniye"], answer:"Amper"}, //42
+{question:"Türkiye'nin komşusu olmayan?", options:["Almanya","Yunanistan","İran","Bulgaristan"], answer:"Almanya"}, //43
+{question:"En sıcak gezegen?", options:["Venüs","Merkür","Mars","Jüpiter"], answer:"Venüs"}, //44
+{question:"Bitkiler ne üretir?", options:["Oksijen","Karbondioksit","Azot","Helyum"], answer:"Oksijen"}, //45
+{question:"Hangi araç uçar?", options:["Uçak","Tren","Otobüs","Araba"], answer:"Uçak"}, //46
+{question:"En hızlı kuş?", options:["Doğan","Kartal","Güvercin","Martı"], answer:"Doğan"}, //47
+{question:"Su kaç derecede kaynar?", options:["100","90","80","50"], answer:"100"}, //48
+{question:"Günde kaç saat var?", options:["24","12","48","20"], answer:"24"}, //49
+{question:"En küçük gezegen?", options:["Merkür","Mars","Venüs","Neptün"], answer:"Merkür"}, //50
+
+{question:"Hangi hayvan süt verir?", options:["İnek","Tavuk","Balık","Yılan"], answer:"İnek"}, //51
+{question:"Beynin görevi?", options:["Düşünmek","Sindirmek","Solumak","Pompalamak"], answer:"Düşünmek"}, //52
+{question:"Yağmur neyle oluşur?", options:["Bulut","Toprak","Rüzgar","Güneş"], answer:"Bulut"}, //53
+{question:"En sert kaya?", options:["Granit","Kum","Toprak","Çamur"], answer:"Granit"}, //54
+{question:"Hangi hayvan sürünür?", options:["Yılan","Kedi","Köpek","At"], answer:"Yılan"}, //55
+{question:"Hangi organ görür?", options:["Göz","Kulak","Burun","Dil"], answer:"Göz"}, //56
+{question:"Hangi taşıt denizde gider?", options:["Gemi","Otobüs","Uçak","Tren"], answer:"Gemi"}, //57
+{question:"En büyük kıta tekrar?", options:["Asya","Afrika","Avrupa","Avustralya"], answer:"Asya"}, //58
+{question:"Hangi meyve kırmızı?", options:["Elma","Muz","Armut","Kivi"], answer:"Elma"}, //59
+{question:"Hangi gezegen mavi görünür?", options:["Neptün","Mars","Venüs","Merkür"], answer:"Neptün"} //60
+];
+
+
+
+  // Kullanıcı eşyaları
+  let userItems = JSON.parse(localStorage.getItem('userItems')) || {
+    busTicket: 0,
+    coffee: 0,
+    chocolate: 0
+  };
+
+  // Kullanıcı puanı
+  let storedScore = parseInt(localStorage.getItem('userScore')) || 0;
+  updateScore(storedScore);
+
+  function updateScore(newScore) {
+    score = newScore;
+    scoreboard.textContent = `Puan: ${score}`;
+    localStorage.setItem('userScore', score);
+  }
+
+  // Animasyon için puan ekleme
+  function animateScore(points) {
+    scoreAnim.textContent = `+${points}`;
+    scoreAnim.style.opacity = '1';
+    scoreAnim.style.animation = 'none';
+    // Trigger reflow for restart animation
+    void scoreAnim.offsetWidth;
+    scoreAnim.style.animation = 'fadeUp 1s forwards';
+  }
+
+  // Mağaza kontrolü - quiz başladı mı?
+  let shopOpen = true;
+
+  pointShopBtn.addEventListener('click', () => {
+    if (!shopOpen) {
+      alert('Yarışma başladı, mağaza kapandı!');
+      return;
+    }
+    if(pointShopPanel.style.display === 'block') {
+      pointShopPanel.style.display = 'none';
+    } else {
+      pointShopPanel.style.display = 'block';
+    }
+    soundClick.play();
+  });
+
+  function buyItem(item, cost) {
+    if (!shopOpen) {
+      alert('Yarışma başladı, mağaza kapandı!');
+      return;
+    }
+    if(score >= cost) {
+      userItems[item]++;
+      updateScore(score - cost);
+      localStorage.setItem('userItems', JSON.stringify(userItems));
+      alert(`${item === 'busTicket' ? 'Otobüs bileti' : item === 'coffee' ? 'Kahve' : 'Çikolata'} satın alındı!`);
+      soundClick.play();
+    } else {
+      alert('Yeterli puanın yok!');
+    }
+  }
+
+  startBtn.addEventListener('click', () => {
+    username = usernameInput.value.trim();
+    if(username.length < 2) {
+      alert('Lütfen adını düzgün gir!');
+      return;
+    }
+    startScreen.classList.remove('show');
+    quizScreen.classList.add('show');
+    welcomeText.textContent = `Hoşgeldin, ${username}!`;
+    shopOpen = false; // yarışma başlayınca mağaza kapanır
+    pointShopPanel.style.display = 'none';
+    bgMusic.volume = 0.15;
+    bgMusic.play();
+    quizStarted = true;
+    currentQuestionIndex = 0;
+    updateScore(score); // stored puan varsa göster
+    loadQuestion();
+  });
+
+  function loadQuestion() {
+    clearMessage();
+    timeLeft = 10;
+    timerText.textContent = `Süre: ${timeLeft}`;
+    questionText.textContent = questions[currentQuestionIndex].question;
+    optionsContainer.innerHTML = '';
+    questions[currentQuestionIndex].options.forEach(option => {
+      const btn = document.createElement('button');
+      btn.textContent = option;
+      btn.onclick = () => answerQuestion(btn, option);
+      optionsContainer.appendChild(btn);
+    });
+    timer = setInterval(() => {
+      timeLeft--;
+      timerText.textContent = `Süre: ${timeLeft}`;
+      if(timeLeft === 0) {
+        clearInterval(timer);
+        disableOptions();
+        showCorrectAnswer();
+        setTimeout(nextQuestion, 2000);
+      }
+    }, 1000);
+  }
+
+  function answerQuestion(btn, selected) {
+    if(timer === null) return; // cevap verildi zaten
+    clearInterval(timer);
+    disableOptions();
+
+    const correctAnswer = questions[currentQuestionIndex].answer;
+
+    if(selected === correctAnswer) {
+      btn.classList.add('correct');
+      showMessage('Doğru!', true);
+      soundCorrect.play();
+      updateScore(score + 10);
+      animateScore(10);
+    } else {
+      btn.classList.add('wrong');
+      showMessage(`Yanlış! Doğru cevap: ${correctAnswer}`, false);
+      soundWrong.play();
+      showCorrectAnswer();
+    }
+
+    setTimeout(nextQuestion, 2000);
+  }
+
+  function disableOptions() {
+    [...optionsContainer.children].forEach(btn => {
+      btn.disabled = true;
+    });
+    timer = null;
+  }
+
+  function showCorrectAnswer() {
+    [...optionsContainer.children].forEach(btn => {
+      if(btn.textContent === questions[currentQuestionIndex].answer) {
+        btn.classList.add('correct');
+      }
+    });
+  }
+
+  function nextQuestion() {
+    currentQuestionIndex++;
+    if(currentQuestionIndex >= questions.length) {
+      endQuiz();
+    } else {
+      loadQuestion();
+    }
+  }
+
+  function endQuiz() {
+    quizScreen.classList.remove('show');
+    resultScreen.classList.add('show');
+    document.getElementById('resultText').textContent = `${username}, toplam puanın: ${score}`;
+    bgMusic.pause();
+  }
+
+  function showMessage(text, correct) {
+    messageBox.textContent = text;
+    messageBox.style.color = correct ? '#4caf50' : '#f44336';
+  }
+  function clearMessage() {
+    messageBox.textContent = '';
+  }
+</script>
+
+</body>
+</html>
